@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
+import Settings from './pages/Settings';  // importe a página de configurações
+import Blog from './pages/Blog';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -14,6 +16,16 @@ function App() {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }/>
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }/>
+          <Route path="/blog" element={
+            <ProtectedRoute>
+              <Blog />
             </ProtectedRoute>
           }/>
           <Route path="*" element={<Navigate to="/" />} />
