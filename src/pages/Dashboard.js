@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -11,8 +11,15 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [postagens, setPostagens] = useState([]);
 
+  
   // Cria o header de autorização (ajuste "Bearer" conforme o esperado pelo seu backend)
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  // Memoiza o authHeader para evitar warnings e re-cálculos desnecessários
+// Memoiza o authHeader para evitar warnings e re-cálculos desnecessários
+  const authHeader = useMemo(() => {
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, [token]);
+
+
 
   console.log("Token enviado:", token);
   console.log("Usuário autenticado:", user);
@@ -64,7 +71,7 @@ const Dashboard = () => {
 
     fetchDashboard();
     fetchPostagens();
-  }, [user, token, navigate, logout]);
+  }, [user, token, navigate, logout, authHeader]);
 
   // Funções de CRUD
   const criarPostagem = async () => {
