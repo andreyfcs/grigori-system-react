@@ -10,6 +10,8 @@ const Dashboard = () => {
   const { token, user, logout } = useAuth();
   const navigate = useNavigate();
   const [postagens, setPostagens] = useState([]);
+  const [titulo, setTitulo] = useState(""); // Estado para o título
+  const [conteudo, setConteudo] = useState(""); // Estado para o conteúdo
 
   
   // Cria o header de autorização (ajuste "Bearer" conforme o esperado pelo seu backend)
@@ -18,8 +20,6 @@ const Dashboard = () => {
   const authHeader = useMemo(() => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, [token]);
-
-
 
   console.log("Token enviado:", token);
   console.log("Usuário autenticado:", user);
@@ -79,10 +79,11 @@ const Dashboard = () => {
   
     const novaPostagem = {
       Users_id: user.id,
-      titulo: "Nova Postagem",
-      conteudo: "Conteúdo da postagem...",
+      titulo, // Usa o valor digitado pelo usuário
+      conteudo, // Usa o valor digitado pelo usuário
       status: "publicado"
     };
+
   
     try {
       const response = await fetch(`${API_URL}/postagens`, {
@@ -96,13 +97,19 @@ const Dashboard = () => {
       const data = await response.json();
       // Atualiza o estado adicionando a nova postagem
       setPostagens(prev => [...prev, data]);
+       
+      // Limpar os campos após a criação da postagem
+       setTitulo("");
+       setConteudo("");
     } catch (error) {
       console.error('Erro ao criar postagem:', error);
     }
   };
 
   const editarPostagem = async (id) => {
-    const postagemEditada = { titulo: "Título Editado", conteudo: "Novo conteúdo!" };
+    const postagemEditada = { 
+       titulo: "Título Editado",
+       conteudo: "Novo conteúdo!" };
     
     try {
       const response = await fetch(`${API_URL}/postagens/${id}`, {
@@ -152,7 +159,28 @@ const Dashboard = () => {
 
       <div>
         <h2>Minhas Postagens</h2>
+
+        {/* Formulário para criar nova postagem */}
+        <div style={{ marginBottom: '20px' }}>
+          <h3>Criar Nova Postagem</h3>
+          <input
+            type="text"
+            placeholder="Título"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            style={{ marginBottom: '10px', padding: '5px', width: '80%' }}
+          />
+          <br />
+          <textarea
+            placeholder="Conteúdo"
+            value={conteudo}
+            onChange={(e) => setConteudo(e.target.value)}
+            style={{ marginBottom: '10px', padding: '5px', width: '80%', height: '100px' }}
+          />
+          <br />
         <button onClick={criarPostagem}>Criar Nova Postagem</button>
+        </div>
+
         {/* Debug: exibe os dados brutos */}
         <pre>{JSON.stringify(postagens, null, 2)}</pre>
         <ul>
