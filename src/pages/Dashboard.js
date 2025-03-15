@@ -2,6 +2,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import './Dashboard.css';
 
 const API_URL = "http://localhost:3007";
 
@@ -10,22 +11,16 @@ const Dashboard = () => {
   const { token, user, logout } = useAuth();
   const navigate = useNavigate();
   const [postagens, setPostagens] = useState([]);
-  const [titulo, setTitulo] = useState(""); // Estado para o título
-  const [conteudo, setConteudo] = useState(""); // Estado para o conteúdo
+  const [titulo, setTitulo] = useState("");
+  const [conteudo, setConteudo] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [imagem_url, setImagemUrl] = useState("");
 
-  
-  // Cria o header de autorização (ajuste "Bearer" conforme o esperado pelo seu backend)
-  // Memoiza o authHeader para evitar warnings e re-cálculos desnecessários
-// Memoiza o authHeader para evitar warnings e re-cálculos desnecessários
   const authHeader = useMemo(() => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, [token]);
 
-  console.log("Token enviado:", token);
-  console.log("Usuário autenticado:", user);
-
   useEffect(() => {
-    // Só busca as postagens quando o usuário e token estiverem disponíveis
     if (!user || !user.id || !token) return;
 
     const fetchDashboard = async () => {
@@ -33,74 +28,67 @@ const Dashboard = () => {
         const response = await fetch(`${API_URL}/dashboard`, {
           headers: { ...authHeader }
         });
-  
+
         if (response.status === 401) {
           logout();
           navigate('/');
           return;
         }
-  
+
         const data = await response.json();
         setMessage(data.message);
       } catch (error) {
         console.error('Erro no dashboard:', error);
       }
     };
-  
+
     const fetchPostagens = async () => {
-  try {
-    console.log("Fazendo requisição para:", `${API_URL}/postagens?user_id=${user.id}`);
-    console.log("Headers enviados:", authHeader);
+      try {
+        const response = await fetch(`${API_URL}/postagens?user_id=${user.id}`, {
+          headers: { ...authHeader }
+        });
 
-    const response = await fetch(`${API_URL}/postagens?user_id=${user.id}`, {
-      headers: { ...authHeader }
-    });
+        if (!response.ok) throw new Error('Erro ao buscar postagens');
 
-    console.log("Código de resposta HTTP:", response.status);
-    
-    if (!response.ok) throw new Error('Erro ao buscar postagens');
-    
-    const data = await response.json();
-    console.log("Postagens retornadas:", data);
-    setPostagens(data);
-  } catch (error) {
-    console.error('Erro ao buscar postagens:', error);
-  }
-};
-
+        const data = await response.json();
+        setPostagens(data);
+      } catch (error) {
+        console.error('Erro ao buscar postagens:', error);
+      }
+    };
 
     fetchDashboard();
     fetchPostagens();
   }, [user, token, navigate, logout, authHeader]);
 
-  // Funções de CRUD
   const criarPostagem = async () => {
     if (!user || !user.id) return;
-  
+
     const novaPostagem = {
       Users_id: user.id,
-      titulo, // Usa o valor digitado pelo usuário
-      conteudo, // Usa o valor digitado pelo usuário
+      titulo,
+      conteudo,
+      categoria,
+      imagem_url,
       status: "publicado"
     };
 
-  
     try {
       const response = await fetch(`${API_URL}/postagens`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeader },
         body: JSON.stringify(novaPostagem)
       });
-  
+
       if (!response.ok) throw new Error('Erro ao criar postagem');
-      
+
       const data = await response.json();
-      // Atualiza o estado adicionando a nova postagem
       setPostagens(prev => [...prev, data]);
-       
-      // Limpar os campos após a criação da postagem
-       setTitulo("");
-       setConteudo("");
+
+      setTitulo("");
+      setConteudo("");
+      setCategoria("");
+      setImagemUrl("");
     } catch (error) {
       console.error('Erro ao criar postagem:', error);
     }
@@ -108,18 +96,19 @@ const Dashboard = () => {
 
   const editarPostagem = async (id) => {
     const postagemEditada = { 
-       titulo: "Título Editado",
-       conteudo: "Novo conteúdo!" };
-    
+      titulo: "Título Editado",
+      conteudo: "Novo conteúdo!"
+    };
+
     try {
       const response = await fetch(`${API_URL}/postagens/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...authHeader },
         body: JSON.stringify(postagemEditada)
       });
-  
+
       if (!response.ok) throw new Error('Erro ao editar postagem');
-      
+
       setPostagens(prev =>
         prev.map(post => (post.id === id ? { ...post, ...postagemEditada } : post))
       );
@@ -134,60 +123,76 @@ const Dashboard = () => {
         method: 'DELETE', 
         headers: { ...authHeader }
       });
-  
+
       if (!response.ok) throw new Error('Erro ao excluir postagem');
-      
+
       setPostagens(prev => prev.filter(post => post.id !== id));
     } catch (error) {
       console.error('Erro ao excluir postagem:', error);
     }
   };
 
-  console.log("Estado atual de postagens:", postagens);
-
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div className="dashboard-container">
       <h2>Bem-vindo à sua Área do Usuário</h2>
       <p>{message}</p>
       <nav>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className="nav-list">
           <li><Link to="/settings">Configurações</Link></li>
           <li><Link to="/blog">Blog</Link></li>
         </ul>
       </nav>
       <button onClick={logout}>Sair</button>
 
-      <div>
+      <div className="posts-section">
         <h2>Minhas Postagens</h2>
 
-        {/* Formulário para criar nova postagem */}
-        <div style={{ marginBottom: '20px' }}>
+        <div className="create-post-container">
           <h3>Criar Nova Postagem</h3>
           <input
             type="text"
             placeholder="Título"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
-            style={{ marginBottom: '10px', padding: '5px', width: '80%' }}
+            className="input-field"
           />
-          <br />
           <textarea
             placeholder="Conteúdo"
             value={conteudo}
             onChange={(e) => setConteudo(e.target.value)}
-            style={{ marginBottom: '10px', padding: '5px', width: '80%', height: '100px' }}
+            className="textarea-field"
           />
-          <br />
-        <button onClick={criarPostagem}>Criar Nova Postagem</button>
+          <input
+            type="text"
+            placeholder="Categoria"
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+            className="input-field"
+          />
+          <input
+            type="text"
+            placeholder="URL da Imagem"
+            value={imagem_url}
+            onChange={(e) => setImagemUrl(e.target.value)}
+            className="input-field"
+          />
+          <button onClick={criarPostagem}>Criar Nova Postagem</button>
         </div>
 
-        {/* Debug: exibe os dados brutos */}
-        <pre>{JSON.stringify(postagens, null, 2)}</pre>
-        <ul>
+        <ul className="posts-list">
           {postagens.map(post => (
-            <li key={post.id}>
-              <strong>{post.titulo}</strong> <br />
-              {post.conteudo} <br />
+            <li key={post.id} className="post-item">
+              <strong>{post.titulo}</strong>
+              <br />
+              <small>
+                <i>
+                  Autor: {post.autor || "Desconhecido"} | Categoria: {post.categoria || "Sem categoria"}
+                </i>
+              </small>
+              <p>{post.conteudo}</p>
+              {post.imagem_url && (
+                <img src={post.imagem_url} alt="Imagem da postagem" className="post-image" />
+              )}
               <button onClick={() => editarPostagem(post.id)}>Editar</button>
               <button onClick={() => deletarPostagem(post.id)}>Excluir</button>
             </li>

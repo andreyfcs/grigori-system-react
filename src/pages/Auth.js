@@ -41,20 +41,20 @@ const Auth = () => {
 
   return (
     <div style={{ maxWidth: '400px', margin: '50px auto', textAlign: 'center', padding: '20px', border: '1px solid #ccc', borderRadius: '10px' }}>
-      <h2>{isRegistering ? 'Registro' : 'Login'}</h2>
+      <h2>{isRegistering ? 'Registro' : 'Grigori'}</h2>
       
       {/* Alternador de Login/Registro */}
       <div style={{ marginBottom: '15px' }}>
-        <button 
+      {/*  <button 
           onClick={() => setIsRegistering(false)} 
           style={{ marginRight: '5px', padding: '8px', backgroundColor: !isRegistering ? 'blue' : 'gray', color: 'white', border: 'none', cursor: 'pointer' }}>
           Login
-        </button>
-        <button 
+        </button> */}
+      {/* <button 
           onClick={() => setIsRegistering(true)} 
           style={{ padding: '8px', backgroundColor: isRegistering ? 'blue' : 'gray', color: 'white', border: 'none', cursor: 'pointer' }}>
           Registro
-        </button>
+        </button> */}
       </div>
 
       {/* Formulário */}
