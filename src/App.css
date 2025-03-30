@@ -36,3 +36,44 @@
     transform: rotate(360deg);
   }
 }
+
+/* Layout principal */
+.app-container {
+  display: flex;
+}
+
+/* Sidebar fixa */
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background: #333;
+  color: white;
+  padding: 20px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Ajusta o conteúdo para não ficar por baixo da sidebar */
+.content {
+  margin-left: 220px; /* Largura da sidebar + margem */
+  padding: 20px;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f4f4f4;
+}
+
+/* Responsividade: Oculta sidebar em telas pequenas */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px;
+    padding: 10px;
+  }
+
+  .content {
+    margin-left: 80px;
+  }
+}
